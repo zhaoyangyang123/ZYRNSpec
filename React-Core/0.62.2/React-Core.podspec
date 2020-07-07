@@ -1,42 +1,105 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
 #
-# Be sure to run `pod lib lint React-Core.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+require "json"
+
+package = {
+  "version"=>"0.62.2",
+  "description"=>"A framework for building native apps using React",
+  "license"=>"MIT"
+}
+version = package['version']
+
+source = { :git => 'https://github.com/facebook/react-native.git' }
+if version == '1000.0.0'
+  # This is an unpublished version, use the latest commit hash of the react-native repo, which we’re presumably in.
+  source[:commit] = `git rev-parse HEAD`.strip
+else
+  source[:tag] = "v#{version}"
+end
+
+folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -Wno-comma -Wno-shorten-64-to-32'
+folly_version = '2018.10.22.00'
+boost_compiler_flags = '-Wno-documentation'
+
+header_subspecs = {
+  'ARTHeaders'                  => 'Libraries/ART/**/*.h',
+  'CoreModulesHeaders'          => 'React/CoreModules/**/*.h',
+  'RCTActionSheetHeaders'       => 'Libraries/ActionSheetIOS/*.h',
+  'RCTAnimationHeaders'         => 'Libraries/NativeAnimation/{Drivers/*,Nodes/*,*}.{h}',
+  'RCTBlobHeaders'              => 'Libraries/Blob/{RCTBlobManager,RCTFileReaderModule}.h',
+  'RCTImageHeaders'             => 'Libraries/Image/*.h',
+  'RCTLinkingHeaders'           => 'Libraries/LinkingIOS/*.h',
+  'RCTNetworkHeaders'           => 'Libraries/Network/*.h',
+  'RCTPushNotificationHeaders'  => 'Libraries/PushNotificationIOS/*.h',
+  'RCTSettingsHeaders'          => 'Libraries/Settings/*.h',
+  'RCTTextHeaders'              => 'Libraries/Text/**/*.h',
+  'RCTVibrationHeaders'         => 'Libraries/Vibration/*.h',
+}
 
 Pod::Spec.new do |s|
-  s.name             = 'React-Core'
-  s.version          = '0.62.2'
-  s.summary          = 'React-Core私有库'
+  s.name                   = "React-Core"
+  s.version                = version
+  s.summary                = "The core of React Native."
+  s.homepage               = "http://facebook.github.io/react-native/"
+  s.license                = package["license"]
+  s.author                 = "Facebook, Inc. and its affiliates"
+  s.platforms              = { :ios => "9.0", :tvos => "9.2" }
+  s.source                 = source
+  s.compiler_flags         = folly_compiler_flags + ' ' + boost_compiler_flags
+  s.header_dir             = "React"
+  s.framework              = "JavaScriptCore"
+  s.library                = "stdc++"
+  s.pod_target_xcconfig    = { "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/ReactCommon\" \"$(PODS_ROOT)/boost-for-react-native\" \"$(PODS_ROOT)/DoubleConversion\" \"$(PODS_ROOT)/Folly\"" }
+  s.user_target_xcconfig   = { "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/Headers/Private/React-Core\""}
+  s.default_subspec        = "Default"
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  s.subspec "Default" do |ss|
+    ss.source_files           = "React/**/*.{c,h,m,mm,S,cpp}"
+    ss.exclude_files          = "React/CoreModules/**/*",
+                                "React/DevSupport/**/*",
+                                "React/Fabric/**/*",
+                                "React/Inspector/**/*"
+    ss.ios.exclude_files      = "React/**/RCTTV*.*"
+    ss.tvos.exclude_files     = "React/Modules/RCTClipboard*",
+                                "React/Views/RCTDatePicker*",
+                                "React/Views/RCTPicker*",
+                                "React/Views/RCTRefreshControl*",
+                                "React/Views/RCTSlider*",
+                                "React/Views/RCTSwitch*",
+    ss.private_header_files   = "React/Cxx*/*.h"
+  end
 
-  s.description      = <<-DESC
-                        React-CorePrivate
-                       DESC
+  s.subspec "DevSupport" do |ss|
+    ss.source_files = "React/DevSupport/*.{h,mm,m}",
+                      "React/Inspector/*.{h,mm,m}"
 
-  s.homepage         = 'https://github.com/zhaoyangyang123/React-Core.git'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'zhaoyangyang1' => 'zhaoyangyang1@100tal.com' }
-  s.source           = { :git => 'https://github.com/zhaoyangyang123/React-Core.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+    ss.dependency "React-Core/Default", version
+    ss.dependency "React-Core/RCTWebSocket", version
+    ss.dependency "React-jsinspector", version
+  end
 
-  s.ios.deployment_target = '8.0'
+  s.subspec "RCTWebSocket" do |ss|
+    ss.source_files = "Libraries/WebSocket/*.{h,m}"
+    ss.dependency "React-Core/Default", version
+  end
 
-  s.source_files = 'React-Core/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'React-Core' => ['React-Core/Assets/*.png']
-  # }
+  # Add a subspec containing just the headers for each
+  # pod that should live under <React/*.h>
+  header_subspecs.each do |name, headers|
+    s.subspec name do |ss|
+      ss.source_files = headers
+      ss.dependency "React-Core/Default"
+    end
+  end
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency "Folly", folly_version
+  s.dependency "React-cxxreact", version
+  s.dependency "React-jsi", version
+  s.dependency "React-jsiexecutor", version
+  s.dependency "Yoga"
+  s.dependency "glog"
 end
+
