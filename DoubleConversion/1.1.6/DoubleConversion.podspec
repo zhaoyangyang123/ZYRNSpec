@@ -1,42 +1,25 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
 #
-# Be sure to run `pod lib lint DoubleConversion.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
 
-Pod::Spec.new do |s|
-  s.name             = 'DoubleConversion'
-  s.version          = '1.1.6'
-  s.summary          = 'DoubleConversion私有库'
+Pod::Spec.new do |spec|
+  spec.name = 'DoubleConversion'
+  spec.version = '1.1.6'
+  spec.license = { :type => 'MIT' }
+  spec.homepage = 'https://github.com/google/double-conversion'
+  spec.summary = 'Efficient binary-decimal and decimal-binary conversion routines for IEEE doubles'
+  spec.authors = 'Google'
+  spec.prepare_command = 'mv src double-conversion'
+  spec.source = { :git => 'https://github.com/google/double-conversion.git',
+                  :tag => "v#{spec.version}" }
+  spec.module_name = 'DoubleConversion'
+  spec.header_dir = 'double-conversion'
+  spec.source_files = 'double-conversion/**/*.{h,cc}'
+  spec.compiler_flags = '-Wno-unreachable-code'
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  # Pinning to the same version as React.podspec.
+  spec.platforms = { :ios => "9.0", :tvos => "9.2" }
 
-  s.description      = <<-DESC
-                     DoubleConversion234
-                       DESC
-
-  s.homepage         = 'https://github.com/zhaoyangyang123/DoubleConversion.git'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'zhaoyangyang1' => 'zhaoyangyang1@100tal.com' }
-  s.source           = { :git => 'https://github.com/zhaoyangyang123/DoubleConversion.git', :tag => s.version }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
-
-  s.ios.deployment_target = '8.0'
-
-  s.source_files = 'DoubleConversion/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'DoubleConversion' => ['DoubleConversion/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
+
