@@ -1,42 +1,61 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
 #
-# Be sure to run `pod lib lint React.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+require "json"
+
+package = {
+  "version"=>"0.62.2",
+  "description"=>"A framework for building native apps using React",
+  "license"=>"MIT"
+}
+version = package['version']
+
+source = { :git => 'https://github.com/facebook/react-native.git' }
+if version == '1000.0.0'
+  # This is an unpublished version, use the latest commit hash of the react-native repo, which we’re presumably in.
+  source[:commit] = `git rev-parse HEAD`.strip
+else
+  source[:tag] = "v#{version}"
+end
 
 Pod::Spec.new do |s|
-  s.name             = 'React'
-  s.version          = '0.62.2'
-  s.summary          = 'React私有库'
+  s.name                   = "React"
+  s.version                = version
+  s.summary                = package["description"]
+  s.description            = <<-DESC
+                               React Native apps are built using the React JS
+                               framework, and render directly to native UIKit
+                               elements using a fully asynchronous architecture.
+                               There is no browser and no HTML. We have picked what
+                               we think is the best set of features from these and
+                               other technologies to build what we hope to become
+                               the best product development framework available,
+                               with an emphasis on iteration speed, developer
+                               delight, continuity of technology, and absolutely
+                               beautiful and fast products with no compromises in
+                               quality or capability.
+                             DESC
+  s.homepage               = "http://facebook.github.io/react-native/"
+  s.license                = package["license"]
+  s.author                 = "Facebook, Inc. and its affiliates"
+  s.platforms              = { :ios => "9.0", :tvos => "9.2" }
+  s.source                 = source
+  s.preserve_paths         = "package.json", "LICENSE", "LICENSE-docs"
+  s.cocoapods_version      = ">= 1.2.0"
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
-
-  s.description      = <<-DESC
-                    ReactPrivate
-                       DESC
-
-  s.homepage         = 'https://github.com/zhaoyangyang123/React.git'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'zhaoyangyang1' => 'zhaoyangyang1@100tal.com' }
-  s.source           = { :git => 'https://github.com/zhaoyangyang123/React.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
-
-  s.ios.deployment_target = '8.0'
-
-  s.source_files = 'React/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'React' => ['React/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency "React-Core", version
+  s.dependency "React-Core/DevSupport", version
+  s.dependency "React-Core/RCTWebSocket", version
+  s.dependency "React-RCTActionSheet", version
+  s.dependency "React-RCTAnimation", version
+  s.dependency "React-RCTBlob", version
+  s.dependency "React-RCTImage", version
+  s.dependency "React-RCTLinking", version
+  s.dependency "React-RCTNetwork", version
+  s.dependency "React-RCTSettings", version
+  s.dependency "React-RCTText", version
+  s.dependency "React-RCTVibration", version
 end
+
